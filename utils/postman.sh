@@ -16,11 +16,11 @@ sudo apt install -y insomnia
 sudo apt install -y libfontconfig-dev
 
 
-# echo 'Installing Dbeaver'
-# echo '#################################################################'
-# wget https://dbeaver.io/files/dbeaver-ce_latest_amd64.deb
-# sudo apt install -y ./dbeaver-ce_latest_amd64.deb
-# rm dbeaver-ce_latest_amd64.deb
+echo 'Installing Dbeaver'
+echo '#################################################################'
+wget https://dbeaver.io/files/dbeaver-ce_latest_amd64.deb
+sudo apt install -y ./dbeaver-ce_latest_amd64.deb
+rm dbeaver-ce_latest_amd64.deb
 
 
 # echo 'Installing PostgresQL'

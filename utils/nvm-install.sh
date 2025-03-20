@@ -33,13 +33,13 @@ export NVM_DIR="$HOME/.nvm"
 nvm ls-remote
 
 # Install and use v22.12.0 Node.js
-VERSION=22.12.0
+VERSION=v22.12.0
 nvm install "$VERSION"
 nvm alias default "$VERSION"
 nvm use "$VERSION"
 echo "Installing useful global npm packages..."
 npm i -g npm@11.0.0
-npm i -g typescript ts-node nodemon pm2 nodemon serve
+npm i -g typescript ts-node nodemon pm2 serve
 npm i -g yarn corepack prettier eslint
 npm i -g npm-check-updates dotenv nx nestjs-cli nats
 npm i -g solc solhint solidity-code-metrics tronbox
