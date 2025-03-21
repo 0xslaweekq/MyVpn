@@ -5,12 +5,12 @@ echo '#################################################################'
 cd ~
 sudo rm -rf /etc/modprobe.d/nvidia.conf /etc/modprobe.d/blacklist-nvidia.conf \
   /etc/modprobe.d/blacklist-nvidia-nouveau.conf
-# sudo apt remove --purge -y '^nvidia-.*'
-# sudo apt remove --purge -y '^cuda-.*'
-# sudo apt autoremove $(dpkg -l *nvidia* |grep ii |awk '{print $2}') -y
-# sudo apt autoremove $(dpkg -l *cuda* |grep ii |awk '{print $2}') -y
-# sudo nvidia-installer --uninstall
-# sudo update-initramfs -u
+sudo apt remove --purge -y '^nvidia-.*'
+sudo apt remove --purge -y '^cuda-.*'
+sudo apt autoremove $(dpkg -l *nvidia* |grep ii |awk '{print $2}') -y
+sudo apt autoremove $(dpkg -l *cuda* |grep ii |awk '{print $2}') -y
+sudo nvidia-installer --uninstall
+sudo update-initramfs -u
 
 sudo apt install -y \
   linux-headers-$(uname -r) clang gcc make acpid build-essential \
