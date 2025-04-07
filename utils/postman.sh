@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#!/bin/bash
 
 cd ~
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -8,15 +8,11 @@ curl -sf https://binaries.nats.dev/nats-io/natscli/nats@latest | sh
 
 echo 'Installing Insomnia'
 echo '#################################################################'
-#Add to sources
 curl -1sLf \
   'https://packages.konghq.com/public/insomnia/setup.deb.sh' |\
   sudo -E distro=ubuntu codename=focal bash
-#Update library'
 sudo apt update
-#Refresh repository sources and install Insomnia
 sudo apt install -y insomnia
-#Install font configuration library & support
 sudo apt install -y libfontconfig-dev
 
 

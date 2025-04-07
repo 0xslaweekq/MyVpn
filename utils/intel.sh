@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Install the Intel graphics GPG public key
 wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
   sudo gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg

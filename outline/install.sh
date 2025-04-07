@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#!/bin/bash
 
 echo "Installing Outline"
 echo '#################################################################'
@@ -25,7 +25,7 @@ echo '#################################################################'
 # SB_IMAGE: The Outline Server Docker image to install, e.g. quay.io/outline/shadowbox:nightly
 # CONTAINER_NAME: Docker instance name for shadowbox (default shadowbox).
 #     For multiple instances also change SHADOWBOX_DIR to an other location
-#     e.g. CONTAINER_NAME=shadowbox-inst1 SHADOWBOX_DIR=/opt/outline/inst1
+#     e.g. CONTAINER_NAME=shadowbox-inst1 SHADOWBOX_DIR=/opt/cursor/outline/inst1
 # SHADOWBOX_DIR: Directory for persistent Outline Server state.
 # ACCESS_CONFIG: The location of the access config text file.
 # SB_DEFAULT_SERVER_NAME: Default name for this server, e.g. "Outline server New York".
@@ -469,7 +469,7 @@ install_shadowbox() {
   run_step "Verifying that Docker daemon is running" verify_docker_running
 
   log_for_sentry "Creating Outline directory"
-  export SHADOWBOX_DIR="${SHADOWBOX_DIR:-/opt/outline}"
+  export SHADOWBOX_DIR="${SHADOWBOX_DIR:-/opt/cursor/outline}"
   mkdir -p "${SHADOWBOX_DIR}"
   chmod u+s,ug+rwx,o-rwx "${SHADOWBOX_DIR}"
 

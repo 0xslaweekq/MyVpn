@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
     hostname: "unbound"
     volumes:
-      - "./unbound_data/:/opt/unbound/etc/unbound/"
+      - "./unbound_data/:/opt/cursor/unbound/etc/unbound/"
     networks:
       admin_network:
         ipv4_address: 10.10.11.200

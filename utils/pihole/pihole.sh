@@ -18,7 +18,7 @@ After=docker.service
 [Service]
 Restart=always
 RestartSec=5
-WorkingDirectory=/opt/pihole
+WorkingDirectory=/opt/cursor/pihole
 ExecStart=/usr/bin/docker compose up
 ExecStop=/usr/bin/docker compose down
 

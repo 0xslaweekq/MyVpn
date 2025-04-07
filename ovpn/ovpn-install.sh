@@ -77,7 +77,7 @@ key-direction 1
 # Now create a script to compile the base configuration with the necessary certificate, key, and encryption files.
 bash -c \
 "cat << EOF > /root/openvpn-ca/config_gen.sh
-#! /usr/bin/env bash
+#!/bin/bash
 # First argument: Client identifier
 KEY_DIR=/etc/openvpn/client
 OUTPUT_DIR=/root

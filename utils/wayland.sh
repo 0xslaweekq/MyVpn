@@ -1,19 +1,12 @@
-#! /usr/bin/env bash
+#!/bin/bash
 
 set -e
 
-# Проверка прав пользователя
-if [[ $EUID -ne 0 ]]; then
-   echo "Этот скрипт нужно запускать с правами суперпользователя (sudo)."
-   exit 1
-fi
-
-# Обновление системы
-echo "Обновление системы..."
+echo "Updating system..."
 sudo apt update && sudo apt upgrade -y
 
-# Настройка Wayland для NVIDIA
-echo "Настройка Wayland для NVIDIA..."
+# Configure Wayland for NVIDIA
+echo "Configuring Wayland for NVIDIA..."
 if ! sudo grep -q '__GLX_VENDOR_LIBRARY_NAME=nvidia' /etc/environment; then
     sudo echo '__GLX_VENDOR_LIBRARY_NAME=nvidia' >> /etc/environment
 fi
@@ -24,12 +17,12 @@ if ! sudo grep -q 'WLR_NO_HARDWARE_CURSORS=1' /etc/environment; then
     sudo echo 'WLR_NO_HARDWARE_CURSORS=1' >> /etc/environment
 fi
 
-# Включение Wayland в GDM
-echo "Включение Wayland в GDM..."
+# Enable Wayland in GDM
+echo "Enabling Wayland in GDM..."
 sudo sed -i '/WaylandEnable=false/s/^/#/' /etc/gdm3/custom.conf || true
 
-# Настройка GNOME для оптимальной работы с Wayland
-echo "Настройка GNOME..."
+# Configure GNOME for optimal Wayland performance
+echo "Configuring GNOME..."
 OVERRIDE_FILE="/usr/share/glib-2.0/schemas/99-gnome-triple-buffering.gschema.override"
 if [ ! -f "$OVERRIDE_FILE" ]; then
     sudo echo "[org.gnome.mutter]" > $OVERRIDE_FILE
@@ -37,8 +30,8 @@ if [ ! -f "$OVERRIDE_FILE" ]; then
     glib-compile-schemas /usr/share/glib-2.0/schemas/
 fi
 
-# Включение Force Full Composition Pipeline для NVIDIA
-echo "Настройка Force Full Composition Pipeline..."
+# Enable Force Full Composition Pipeline for NVIDIA
+echo "Configuring Force Full Composition Pipeline..."
 if command -v nvidia-settings &> /dev/null; then
     sudo nvidia-settings --assign CurrentMetaMode="nvidia-auto-select +0+0 { ForceCompositionPipeline = On }, nvidia-auto-select +1920+1080 { ForceCompositionPipeline = On }"
 fi
@@ -78,11 +71,11 @@ fi
 # vblank_mode=0 glxgears
 gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
 
-# Перезагрузка системы для применения настроек
-echo "Скрипт завершён. Перезагрузите систему для применения изменений. Перезагрузить сейчас? (y/n)"
+# Restart system to apply settings
+echo "Script completed. Restart your system to apply changes. Restart now? (y/n)"
 read -r RESTART
 if [[ $RESTART == "y" || $RESTART == "Y" ]]; then
     reboot
 else
-    echo "Перезагрузите систему позже для применения всех настроек."
+    echo "Restart your system later to apply all settings."
 fi

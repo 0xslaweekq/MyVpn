@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#!/bin/bash
 
 sudo mkdir -pm755 /etc/apt/keyrings
 sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
@@ -18,28 +18,28 @@ sudo apt install --fix-broken -y
 git clone --recursive https://github.com/HansKristian-Work/vkd3d-proton
 cd vkd3d-proton
 chmod +x ./package-release.sh
-mkdir -p ~/vkd3d
-sudo ./package-release.sh master ~/vkd3d --no-package
+mkdir -p $HOME/vkd3d
+sudo ./package-release.sh master $HOME/vkd3d --no-package
 cd ~
 sudo rm -rf vkd3d-proton
 
 # change to build.86 for 32-bit
 sudo apt install -y gcc-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-win32
-sudo chmod +x ~/vkd3d/vkd3d-proton-master/setup_vkd3d_proton.sh
-~/vkd3d/vkd3d-proton-master/setup_vkd3d_proton.sh install
+sudo chmod +x $HOME/vkd3d/vkd3d-proton-master/setup_vkd3d_proton.sh
+$HOME/vkd3d/vkd3d-proton-master/setup_vkd3d_proton.sh install
 
-# wget -O ~/steam.deb http://media.steampowered.com/client/installer/steam.deb
+# wget -O $HOME/steam.deb http://media.steampowered.com/client/installer/steam.deb
 wget https://repo.steampowered.com/steam/archive/precise/steam_latest.deb
-sudo apt install -y ~/steam_latest.deb
-sudo rm -rf ~/steam_latest.deb
+sudo apt install -y $HOME/steam_latest.deb
+sudo rm -rf $HOME/steam_latest.deb
 
-tee -a ~/.steam/steam/steam_dev.cfg <<< \
+tee -a $HOME/.steam/steam/steam_dev.cfg <<< \
 '
 @nClientDownloadEnableHTTP2PlatformLinux 0
 @fDownloadRateImprovementToAddAnotherConnection 1.0
 '
 flatpak override com.usebottles.bottles --user --filesystem=xdg-data/applications
-sudo flatpak override com.usebottles.bottles --filesystem=~/.local/share/Steam
+sudo flatpak override com.usebottles.bottles --filesystem=$HOME/.local/share/Steam
 
 
 # primerun %command% -input_button_code_is_scan_code -vulkan_disable_steam_shader_cache
@@ -52,18 +52,18 @@ sudo flatpak override com.usebottles.bottles --filesystem=~/.local/share/Steam
 # for .msi files wine msiexec /i
 # for .exe files wine *.exe
 
-# mkdir -v ~/.wine-MyApp
-# export WINEPREFIX=~/.wine-MyApp
+# mkdir -v $HOME/.wine-MyApp
+# export WINEPREFIX=$HOME/.wine-MyApp
 # wine winecfg
 
-# export WINEPREFIX=~/.wine-MyApp
+# export WINEPREFIX=$HOME/.wine-MyApp
 # uninstall wine
-# rm -r ~/.wine-MyApp
+# rm -r $HOME/.wine-MyApp
 
 # flatpak steam
-# tee -a ~/.var/app/com.valvesoftware.Steam/.steam/steam/steam_dev.cfg <<< \
+# tee -a $HOME/.var/app/com.valvesoftware.Steam/.steam/steam/steam_dev.cfg <<< \
 # '
 # @nClientDownloadEnableHTTP2PlatformLinux 0
 # @fDownloadRateImprovementToAddAnotherConnection 1.0
 # '
-# sudo flatpak override com.usebottles.bottles --filesystem=~/.var/app/com.valvesoftware.Steam/data/Steam
+# sudo flatpak override com.usebottles.bottles --filesystem=$HOME/.var/app/com.valvesoftware.Steam/data/Steam

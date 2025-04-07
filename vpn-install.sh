@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # cd ~ && \
 # curl -O https://raw.githubusercontent.com/0xSlaweekq/MyVpn/main/vpn-install.sh
 # chmod +x vpn-install.sh
@@ -62,6 +64,7 @@ sudo ufw allow 22/tcp
 sudo ufw allow 443/tcp
 sudo ufw allow 8080/tcp
 sudo ufw allow 9001/tcp
+sudo ufw allow 9007/tcp
 
 # 3proxy
 sudo ufw allow 3128/tcp

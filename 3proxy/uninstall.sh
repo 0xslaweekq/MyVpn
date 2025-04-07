@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#!/bin/bash
 
 echo "Deleting 3proxy"
 sudo systemctl stop 3proxy.service

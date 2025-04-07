@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#!/bin/bash
 
 # Add Ethereum repository and install Solidity compiler
 sudo add-apt-repository -y ppa:ethereum/ethereum
