@@ -59,8 +59,10 @@ echo "🔹 Configuring TLP..."
 BASE_URL=https://raw.githubusercontent.com/0xSlaweekq/MyVpn/main/utils
 sudo curl -L $BASE_URL/tlp.conf -o /etc/tlp.conf
 
+
 sudo systemctl enable --now tlp.service
 sudo systemctl start tlp.service
+sudo systemctl restart tlp.service
 sudo /etc/init.d/tlp restart
 sudo tlp start
 
