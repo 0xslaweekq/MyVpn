@@ -15,6 +15,9 @@ if ! dkms status | grep -q "msi_ec"; then
   sudo git clone https://github.com/BeardOverflow/msi-ec.git /tmp/msi-ec
   cd /tmp/msi-ec
   sudo make dkms-install
+  sudo make
+  sudo make install
+  sudo modprobe msi_ec
 
   cd "$HOME"
 else
@@ -29,7 +32,7 @@ fi
 sudo tee /usr/local/bin/msi_battery_control.sh > /dev/null <<EOL
 #!/bin/bash
 while true; do
-  charge_level=\$(cat /sys/class/power_supply/BAT0/capacity)
+  charge_level=\$(cat /sys/class/power_supply/BAT1/capacity)
   if [ "\$charge_level" -ge 97 ]; then
     echo "Charge disabled!"
     sudo msi-ec -w 0x2F 0
@@ -68,7 +71,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable msi-battery.service
 sudo systemctl start msi-battery.service
 
-echo "🔹 Installing Qt 6.8.2 build dependencies..."
+echo "🔹 Installing Qt 6.9.0 build dependencies..."
 sudo add-apt-repository -y ppa:kubuntu-ppa/backports
 sudo apt update
 sudo apt install -y qt6-base-dev qt6-declarative-dev qt6-tools-dev
@@ -79,32 +82,32 @@ chmod +x ./qt-online.run
 ./qt-online.run
 cd ~
 
-# Добавляем пути Qt 6.8.2 в .bashrc
-echo 'export PATH=$HOME/Qt/6.8.2/gcc_64/bin:$PATH' >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=$HOME/Qt/6.8.2/gcc_64/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-echo 'export QT_PLUGIN_PATH=$HOME/Qt/6.8.2/gcc_64/plugins:$QT_PLUGIN_PATH' >> ~/.bashrc
-echo 'export QML2_IMPORT_PATH=$HOME/Qt/6.8.2/gcc_64/qml:$QML2_IMPORT_PATH' >> ~/.bashrc
+# Добавляем пути Qt 6.9.0 в .bashrc
+echo 'export PATH=$HOME/Qt/6.9.0/gcc_64/bin:$PATH' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=$HOME/Qt/6.9.0/gcc_64/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+echo 'export QT_PLUGIN_PATH=$HOME/Qt/6.9.0/gcc_64/plugins:$QT_PLUGIN_PATH' >> ~/.bashrc
+echo 'export QML2_IMPORT_PATH=$HOME/Qt/6.9.0/gcc_64/qml:$QML2_IMPORT_PATH' >> ~/.bashrc
 
 # Применяем изменения к текущей сессии
 source ~/.bashrc
 
 # Создаем символические ссылки для основных библиотек Qt
-sudo ln -sf $HOME/Qt/6.8.2/gcc_64/lib/libQt6Core.so.6 /usr/lib/libQt6Core.so.6
-sudo ln -sf $HOME/Qt/6.8.2/gcc_64/lib/libQt6Gui.so.6 /usr/lib/libQt6Gui.so.6
-sudo ln -sf $HOME/Qt/6.8.2/gcc_64/lib/libQt6Widgets.so.6 /usr/lib/libQt6Widgets.so.6
-sudo ln -sf $HOME/Qt/6.8.2/gcc_64/lib/libQt6Network.so.6 /usr/lib/libQt6Network.so.6
-sudo ln -sf $HOME/Qt/6.8.2/gcc_64/lib/libQt6Qml.so.6 /usr/lib/libQt6Qml.so.6
-sudo ln -sf $HOME/Qt/6.8.2/gcc_64/lib/libQt6Quick.so.6 /usr/lib/libQt6Quick.so.6
+sudo ln -sf $HOME/Qt/6.9.0/gcc_64/lib/libQt6Core.so.6 /usr/lib/libQt6Core.so.6
+sudo ln -sf $HOME/Qt/6.9.0/gcc_64/lib/libQt6Gui.so.6 /usr/lib/libQt6Gui.so.6
+sudo ln -sf $HOME/Qt/6.9.0/gcc_64/lib/libQt6Widgets.so.6 /usr/lib/libQt6Widgets.so.6
+sudo ln -sf $HOME/Qt/6.9.0/gcc_64/lib/libQt6Network.so.6 /usr/lib/libQt6Network.so.6
+sudo ln -sf $HOME/Qt/6.9.0/gcc_64/lib/libQt6Qml.so.6 /usr/lib/libQt6Qml.so.6
+sudo ln -sf $HOME/Qt/6.9.0/gcc_64/lib/libQt6Quick.so.6 /usr/lib/libQt6Quick.so.6
 
 # Обновляем кэш библиотек
 sudo ldconfig
 
 # Создаем файл конфигурации для ldconfig
-sudo bash -c "echo '$HOME/Qt/6.8.2/gcc_64/lib' > /etc/ld.so.conf.d/qt6.conf"
+sudo bash -c "echo '$HOME/Qt/6.9.0/gcc_64/lib' > /etc/ld.so.conf.d/qt6.conf"
 sudo ldconfig
 
 # Создаем альтернативу для qmake6
-sudo update-alternatives --install /usr/bin/qmake6 qmake6 $HOME/Qt/6.8.2/gcc_64/bin/qmake6 100
+sudo update-alternatives --install /usr/bin/qmake6 qmake6 $HOME/Qt/6.9.0/gcc_64/bin/qmake6 100
 source ~/.bashrc
 qmake6 --version
 
