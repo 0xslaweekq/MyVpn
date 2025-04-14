@@ -24,52 +24,7 @@ else
   echo "...MSI EC module already installed, skipping..."
 fi
 
-echo "🔹 Create automatic MSI battery charge control..."
-if [ -f "/usr/local/bin/msi_battery_control.sh" ]; then
-  sudo rm -f /usr/local/bin/msi_battery_control.sh
-fi
-
-sudo tee /usr/local/bin/msi_battery_control.sh > /dev/null <<EOL
-#!/bin/bash
-while true; do
-  charge_level=\$(cat /sys/class/power_supply/BAT1/capacity)
-  if [ "\$charge_level" -ge 97 ]; then
-    echo "Charge disabled!"
-    sudo msi-ec -w 0x2F 0
-  elif [ "\$charge_level" -le 30 ]; then
-    echo "Charge enabled!"
-    sudo msi-ec -w 0x2F 1
-  fi
-  sleep 60
-done
-EOL
-
-sudo chmod +x /usr/local/bin/msi_battery_control.sh
-
-echo "🔹 Setting up automatic battery charge control..."
-if [ -f "/etc/systemd/system/msi-battery.service" ]; then
-  sudo rm -f /etc/systemd/system/msi-battery.service
-fi
-
-sudo tee /etc/systemd/system/msi-battery.service > /dev/null <<EOL
-[Unit]
-Description=MSI Smart Battery Control
-After=multi-user.target
-
-[Service]
-Type=simple
-ExecStart=/usr/local/bin/msi_battery_control.sh
-Restart=always
-User=root
-
-[Install]
-WantedBy=multi-user.target
-EOL
-
-echo "🔹 Enable and start the service..."
-sudo systemctl daemon-reload
-sudo systemctl enable msi-battery.service
-sudo systemctl start msi-battery.service
+# TODO tlp
 
 echo "🔹 Installing Qt 6.9.0 build dependencies..."
 sudo add-apt-repository -y ppa:kubuntu-ppa/backports
