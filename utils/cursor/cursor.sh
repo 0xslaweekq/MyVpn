@@ -8,7 +8,7 @@ if ! [ -f /opt/cursor/cursor.appimage ]; then
 
     echo "Downloading Cursor AppImage..."
     sudo mkdir -p /opt/cursor
-    sudo curl -L https://downloads.cursor.com/production/7801a556824585b7f2721900066bc87c4a09b743/linux/x64/Cursor-0.48.8-x86_64.AppImage -o /opt/cursor/cursor.appimage
+    sudo curl -L https://downloads.cursor.com/production/61e99179e4080fecf9d8b92c6e2e3e00fbfb53f4/linux/x64/Cursor-0.48.9-x86_64.AppImage -o /opt/cursor/cursor.appimage
     sudo chmod +x /opt/cursor/cursor.appimage
     sudo ln -s /opt/cursor/cursor.appimage /usr/local/bin/cursor
 
