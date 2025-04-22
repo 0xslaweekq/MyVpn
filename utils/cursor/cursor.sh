@@ -12,8 +12,8 @@ sudo apt install -y curl
 echo "Downloading Cursor AppImage..."
 sudo mkdir -p /opt/cursor
 rm -rf /opt/cursor/cursor.AppImage
-# sudo curl -L https://downloads.cursor.com/production/61e99179e4080fecf9d8b92c6e2e3e00fbfb53f4/linux/x64/Cursor-0.48.9-x86_64.AppImage -o /opt/cursor/cursor.AppImage
-sudo curl -L https://downloader.cursor.sh/linux/appImage/x64 -o /opt/cursor/cursor.AppImage
+sudo curl -L https://downloads.cursor.com/production/61e99179e4080fecf9d8b92c6e2e3e00fbfb53f4/linux/x64/Cursor-0.48.9-x86_64.AppImage -o /opt/cursor/cursor.AppImage
+# sudo curl -L https://downloader.cursor.com/linux/appImage/x64 -o /opt/cursor/cursor.AppImage
 sudo ln -sf /opt/cursor/cursor.AppImage /usr/local/bin/cursor
 sudo chmod +x /usr/local/bin/cursor
 
@@ -30,18 +30,18 @@ mkdir -p "$HOME/.local/share/applications"
 curl -L $BASE_URL/cursor.desktop -o $HOME/.local/share/applications/cursor.desktop
 chmod +x $HOME/.local/share/applications/cursor.desktop
 
-echo "🔹 Creating update script for Cursor..."
-sudo curl -L $BASE_URL/update-cursor.sh -o /opt/cursor/update-cursor.sh
-sudo chmod +x /opt/cursor/update-cursor.sh
+# echo "🔹 Creating update script for Cursor..."
+# sudo curl -L $BASE_URL/update-cursor.sh -o /opt/cursor/update-cursor.sh
+# sudo chmod +x /opt/cursor/update-cursor.sh
 
-echo "🔹 Creating update service for Cursor..."
-sudo curl -L $BASE_URL/update-cursor.service -o /etc/systemd/system/update-cursor.service
-sudo systemctl daemon-reload
-sudo systemctl enable update-cursor
-sudo systemctl start update-cursor
-sudo systemctl status update-cursor
-sudo systemctl stop update-cursor
-sudo systemctl disable update-cursor
+# echo "🔹 Creating update service for Cursor..."
+# sudo curl -L $BASE_URL/update-cursor.service -o /etc/systemd/system/update-cursor.service
+# sudo systemctl daemon-reload
+# sudo systemctl enable update-cursor
+# sudo systemctl start update-cursor
+# sudo systemctl status update-cursor
+# sudo systemctl stop update-cursor
+# sudo systemctl disable update-cursor
 
 xdg-mime default cursor.desktop text/plain
 xdg-mime default cursor.desktop application/x-shellscript
