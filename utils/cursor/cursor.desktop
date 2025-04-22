@@ -1,8 +1,11 @@
 [Desktop Entry]
 Name=Cursor AI IDE
-Exec=/opt/cursor/cursor.appimage --no-sandbox
+Exec=/opt/cursor/cursor.AppImage %F
+TryExec=/opt/cursor/cursor.AppImage
 Icon=/opt/cursor/cursor.png
 Terminal=false
 Type=Application
-Categories=Utility;Development;
-MimeType=text/plain;
+Categories=Development;IDE;TextEditor;
+MimeType=text/plain;text/javascript;inode/directory;application/x-cursor-workspace;application/x-shellscript;
+Keywords=cursor;code;editor;ai;development;programming;
+StartupWMClass=Cursor
