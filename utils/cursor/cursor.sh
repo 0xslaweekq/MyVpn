@@ -27,6 +27,7 @@ sudo curl -L $BASE_URL/cursor.png -o /opt/cursor/cursor.png
 
 echo "🔹 Creating .desktop entry for Cursor..."
 mkdir -p "$HOME/.local/share/applications"
+rm $HOME/.local/share/applications/cursor.desktop
 curl -L $BASE_URL/cursor.desktop -o $HOME/.local/share/applications/cursor.desktop
 chmod +x $HOME/.local/share/applications/cursor.desktop
 
@@ -55,7 +56,7 @@ xdg-mime default cursor.desktop text/x-java
 echo "Updating system databases..."
 update-mime-database "$HOME/.local/share/mime"
 update-desktop-database "$HOME/.local/share/applications"
-gtk-update-icon-cache -f -t "$HOME/.local/share/icons/hicolor"
+gtk-update-icon-cache -f -t "$HOME/.local/share/icons"
 
 # Set Cursor as default editor for git commit messages
 git config --global core.editor "/opt/cursor/cursor.appimage --wait"
