@@ -11,8 +11,8 @@ sudo apt install -y curl
 
 echo "Downloading Cursor AppImage..."
 sudo mkdir -p /opt/cursor
-rm -rf /opt/cursor/cursor.AppImage
-sudo curl -L https://downloads.cursor.com/production/61e99179e4080fecf9d8b92c6e2e3e00fbfb53f4/linux/x64/Cursor-0.48.9-x86_64.AppImage -o /opt/cursor/cursor.AppImage
+sudo rm -rf /opt/cursor/cursor.AppImage
+sudo curl -L https://downloads.cursor.com/production/ec408037b24566b11e6132c58bbe6ad27046eb91/linux/x64/Cursor-0.49.4-x86_64.AppImage -o /opt/cursor/cursor.AppImage
 # sudo curl -L https://downloader.cursor.com/linux/appImage/x64 -o /opt/cursor/cursor.AppImage
 sudo ln -sf /opt/cursor/cursor.AppImage /usr/local/bin/cursor
 sudo chmod +x /usr/local/bin/cursor
