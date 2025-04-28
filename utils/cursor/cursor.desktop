@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Cursor AI IDE
-Exec=/opt/cursor/cursor.AppImage %F
+Exec=/opt/cursor/cursor.AppImage --no-sandbox
 TryExec=/opt/cursor/cursor.AppImage
 Icon=/opt/cursor/cursor.png
 Terminal=false
