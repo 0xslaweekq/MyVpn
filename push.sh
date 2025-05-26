@@ -13,6 +13,5 @@ do
   echo "Start building and push $image"
   docker buildx build -f ./$image/Dockerfile -t slaweekq/$image:latest --push ./$image
   echo "Successfily pulled image: slaweekq/$image:latest
-
   "
 done

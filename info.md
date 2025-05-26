@@ -202,9 +202,9 @@ server:
      private-address: fe80::/10
 ```
 
-# Виртуальный адрес access-control: 10.20.20.0/24 меняем на адрес своей подсети!
+- Виртуальный адрес access-control: 10.20.20.0/24 меняем на адрес своей подсети!
 
-# Ребутим сервер командой reboot и проверяем работу DNS сервера командами:
+- Ребутим сервер командой reboot и проверяем работу DNS сервера командами:
 
 dig pi-hole.net @127.0.0.1 -p 5353
 
@@ -212,49 +212,71 @@ dig sigfail.verteiltesysteme.net @127.0.0.1 -p 5353
 
 dig sigok.verteiltesysteme.net @127.0.0.1 -p 5353
 
-# В первом и третьем случае должен выдаваться статус NOERROR, во втором SERFAIL. Если выводы такие - то все супер.
+- В первом и третьем случае должен выдаваться статус NOERROR, во втором SERFAIL. Если выводы такие - то все супер.
 
-# Далее в браузере открываем веб интерфейс Pihole. Адрес будет такой же, как и адрес VPS сервера и /admin (пример http://185.18.55.137/admin). Переходим на вкладку настроек и делаем как на картинке:
+- Далее в браузере открываем веб интерфейс Pihole. Адрес будет такой же, как и адрес VPS сервера и /admin (пример http://185.18.55.137/admin). Переходим на вкладку настроек и делаем как на картинке:
 
-# Внизу еще можно поставить галочку Use DNSSEC и сохранить.
+- Внизу еще можно поставить галочку Use DNSSEC и сохранить.
 
-# Ну и хорошо бы закрыть веб интерфейс Pihole чтобы его не брутили. Оставим доступ только из внутренней подсети:
+- Ну и хорошо бы закрыть веб интерфейс Pihole чтобы его не брутили. Оставим доступ только из внутренней подсети:
 
 iptables -A INPUT -s 10.55.55.0/24 -p tcp --dport 80 -j ACCEPT
 
 iptables -A INPUT -p tcp --dport 80 -j DROP
-# Также не забывает тут подставить свою виртуальную сеть вместо 10.55.55.0/24.
+- Также не забывает тут подставить свою виртуальную сеть вместо 10.55.55.0/24.
 
-# 6. Чтобы протестировать все настраиваемые сервисы, переходим по ссылкам:
+- 6. Чтобы протестировать все настраиваемые сервисы, переходим по ссылкам:
 
-# Тест на утечку DNS трафика https://dnsleak.com/
-# и https://www.dnsleaktest.com/ тут адрес DNS сервера должен совпадать с белым IP адресом нашего VPS сервера.
+- Тест на утечку DNS трафика https://dnsleak.com/
+- и https://www.dnsleaktest.com/ тут адрес DNS сервера должен совпадать с белым IP адресом нашего VPS сервера.
 
 # P.S.
 
-# Для большей эффективности Pihole, можно добавить дополнительные источники с адресами для фильтрации мусорного трафика. Я добавлял эти:
+- Для большей эффективности Pihole, можно добавить дополнительные источники с адресами для фильтрации мусорного трафика. Я добавлял эти:
 
-# http://sysctl.org/cameleon/hosts
+- http://sysctl.org/cameleon/hosts
 
-# https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
+- https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
 
-# https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
+- https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
 
-# https://easylist-downloads.adblockplus.org/easyprivacy.txt
+- https://easylist-downloads.adblockplus.org/easyprivacy.txt
 
-# https://easylist-downloads.adblockplus.org/easylist.txt
+- https://easylist-downloads.adblockplus.org/easylist.txt
 
-# http://www.fanboy.co.nz/adblock/opera/urlfilter.ini
+- http://www.fanboy.co.nz/adblock/opera/urlfilter.ini
 
-# http://www.fanboy.co.nz/adblock/fanboy-tracking.txt
+- http://www.fanboy.co.nz/adblock/fanboy-tracking.txt
 
-# http://phishing.mailscanner.info/phishing.bad.sites.conf
+- http://phishing.mailscanner.info/phishing.bad.sites.conf
 
-# https://zeltser.com/malicious-ip-blocklists/
+- https://zeltser.com/malicious-ip-blocklists/
 
-# Дополнительные списки можно скачать от сюда https://firebog.net/
+- Дополнительные списки можно скачать от сюда https://firebog.net/
 
-# Добавляется через веб интерфейс.
+- Добавляется через веб интерфейс.
 
+- По итогу мы имеем свой VPN сервер за границей, соответственно и возможность посещать желаемые ресурсы, свой DNS сервер, с шифрованием трафика, а также блокировщик рекламы, что является приятным дополнением. Эффективность блокировки конечно не 100%, но почти вдвое больше чем изначально. Реклама блокируется не только в браузере, но и в приложениях телефона (например Avito).
 
-# По итогу мы имеем свой VPN сервер за границей, соответственно и возможность посещать желаемые ресурсы, свой DNS сервер, с шифрованием трафика, а также блокировщик рекламы, что является приятным дополнением. Эффективность блокировки конечно не 100%, но почти вдвое больше чем изначально. Реклама блокируется не только в браузере, но и в приложениях телефона (например Avito).
+```
+# echo "Installing wireguard"
+# echo '#################################################################'
+# cd ~
+# wget https://git.io/wireguard -O wireguard-install.sh && sudo bash wireguard-install.sh
+# curl -O https://raw.githubusercontent.com/0xSlaweekq/MyVpn/main/wg/wireguard-install.sh
+# curl -O https://raw.githubusercontent.com/angristan/wireguard-install/master/wireguard-install.sh
+# chmod +x wireguard-install.sh
+# sudo ./wireguard-install.sh
+
+# ssh-keygen -f "/home/msi/.ssh/known_hosts" -R "178.128.17.181"
+
+# curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/jammy.noarmor.gpg | \
+#   sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+# curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/jammy.tailscale-keyring.list | \
+#   sudo tee /etc/apt/sources.list.d/tailscale.list
+# sudo apt update
+# sudo apt install -y tailscale
+# sudo tailscale up
+# tailscale ip -4
+# 2C-4D-54-E9-02-BD
+```
