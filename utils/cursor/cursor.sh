@@ -1,52 +1,65 @@
 #!/bin/bash
-set -e
 
-if ! [ -f /opt/cursor/cursor.appimage ]; then
-    echo "🔹 Installing Cursor AI IDE..."
-    sudo apt update
-    sudo apt install -y curl
+# Cursor IDE Installation & Integration Script for Linux
+# This script sets up Cursor IDE with desktop integration, file associations, and update capability
 
-    echo "Downloading Cursor AppImage..."
-    sudo mkdir -p /opt/cursor
-    sudo curl -L https://downloads.cursor.com/production/66290080aae40d23364ba2371832bda0933a3641/linux/x64/Cursor-0.48.7-x86_64.AppImage -o /opt/cursor/cursor.appimage
-    sudo chmod +x /opt/cursor/cursor.appimage
-    sudo ln -s /opt/cursor/cursor.appimage /usr/local/bin/cursor
+set -e # Exit on error
 
-    BASE_URL=https://raw.githubusercontent.com/0xSlaweekq/MyVpn/main/utils/cursor
-    echo "Downloading Cursor icon..."
-    sudo curl -L $BASE_URL/cursor.png -o /opt/cursor/cursor.png
+echo "🔹 Installing Cursor AI IDE..."
+sudo apt update
+sudo apt install -y curl
 
-    echo "🔹 Creating .desktop entry for Cursor..."
-    mkdir -p "$HOME/.local/share/applications"
-    curl -L $BASE_URL/cursor.desktop -o $HOME/.local/share/applications/cursor.desktop
+echo "Downloading Cursor AppImage..."
+sudo mkdir -p /opt/cursor
+CURSOR_DIR=/opt/cursor/cursor.AppImage
+sudo rm -rf $CURSOR_DIR
+sudo curl -L https://downloads.cursor.com/production/96e5b01ca25f8fbd4c4c10bc69b15f6228c80771/linux/x64/Cursor-0.50.5-x86_64.AppImage -o $CURSOR_DIR
+# sudo curl -L https://downloader.cursor.com/linux/appImage/x64 -o $CURSOR_DIR
+sudo ln -sf $CURSOR_DIR /usr/local/bin/cursor
+sudo chmod +x /usr/local/bin/cursor
 
-    # echo "🔹 Creating update script for Cursor..."
-    # sudo curl -L $BASE_URL/update-cursor.sh -o /opt/cursor/update-cursor.sh
-    # sudo chmod +x /opt/cursor/update-cursor.sh
+    # TMP_DIR=$(mktemp -d)
+    # cd $TMP_DIR
+    # "/opt/cursor/cursor.AppImage" --appimage-extract >/dev/null 2>&1
 
-    # echo "🔹 Creating update service for Cursor..."
-    # sudo curl -L $BASE_URL/update-cursor.service -o /etc/systemd/system/update-cursor.service
-    # sudo systemctl daemon-reload
-    # sudo systemctl enable update-cursor
-    # sudo systemctl start update-cursor
-    # sudo systemctl status update-cursor
-    # sudo systemctl stop update-cursor
-    # sudo systemctl disable update-cursor
+BASE_URL=https://raw.githubusercontent.com/0xSlaweekq/MyVpn/main/utils/cursor
+echo "Downloading Cursor icon..."
+sudo curl -L $BASE_URL/cursor.png -o /opt/cursor/cursor.png
 
-    xdg-mime default cursor.desktop text/plain
-    xdg-mime default cursor.desktop application/x-shellscript
-    xdg-mime default cursor.desktop text/x-script.python
-    xdg-mime default cursor.desktop text/javascript
-    xdg-mime default cursor.desktop text/x-c
-    xdg-mime default cursor.desktop text/x-c++
-    xdg-mime default cursor.desktop text/x-java
+echo "🔹 Creating .desktop entry for Cursor..."
+mkdir -p "$HOME/.local/share/applications"
+rm $HOME/.local/share/applications/cursor.desktop
+curl -L $BASE_URL/cursor.desktop -o $HOME/.local/share/applications/cursor.desktop
+chmod +x $HOME/.local/share/applications/cursor.desktop
 
-    # Set Cursor as default editor for git commit messages
-    git config --global core.editor "/opt/cursor/cursor.appimage --wait"
+# echo "🔹 Creating update script for Cursor..."
+# sudo curl -L $BASE_URL/update-cursor.sh -o /opt/cursor/update-cursor.sh
+# sudo chmod +x /opt/cursor/update-cursor.sh
 
-    update-desktop-database "$HOME/.local/share/applications"
+# echo "🔹 Creating update service for Cursor..."
+# sudo curl -L $BASE_URL/update-cursor.service -o /etc/systemd/system/update-cursor.service
+# sudo systemctl daemon-reload
+# sudo systemctl enable update-cursor
+# sudo systemctl start update-cursor
+# sudo systemctl status update-cursor
+# sudo systemctl stop update-cursor
+# sudo systemctl disable update-cursor
 
-    echo "Cursor AI IDE installation complete. You can find it in your application menu."
-else
-    echo "🔹 Cursor AI IDE is already installed."
-fi
+xdg-mime default cursor.desktop text/plain
+xdg-mime default cursor.desktop application/x-shellscript
+xdg-mime default cursor.desktop text/x-script.python
+xdg-mime default cursor.desktop text/javascript
+xdg-mime default cursor.desktop text/x-c
+xdg-mime default cursor.desktop text/x-c++
+xdg-mime default cursor.desktop text/x-java
+
+# Update MIME and icon databases
+echo "Updating system databases..."
+update-mime-database "$HOME/.local/share/mime"
+update-desktop-database "$HOME/.local/share/applications"
+gtk-update-icon-cache -f -t "$HOME/.local/share/icons"
+
+# Set Cursor as default editor for git commit messages
+git config --global core.editor "/opt/cursor/cursor.AppImage --wait"
+
+echo "Cursor AI IDE installation complete. You can find it in your application menu."

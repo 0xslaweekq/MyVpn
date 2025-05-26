@@ -32,8 +32,8 @@ export NVM_DIR="$HOME/.nvm"
 
 nvm ls-remote
 
-# Install and use v22.12.0 Node.js
-VERSION=v22.12.0
+# Install and use v22.15.0 Node.js
+VERSION=v22.15.0
 nvm install "$VERSION"
 nvm alias default "$VERSION"
 nvm use "$VERSION"
@@ -42,7 +42,7 @@ npm i -g npm@11.2.0
 npm i -g typescript ts-node nodemon pm2 serve
 npm i -g yarn corepack prettier eslint
 npm i -g npm-check-updates dotenv nx nestjs-cli nats
-npm i -g solc solhint solidity-code-metrics tronbox
+# npm i -g solc solhint solidity-code-metrics tronbox
 corepack enable
 
 # Check installed versions Node.js
