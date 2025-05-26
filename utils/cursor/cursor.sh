@@ -35,7 +35,7 @@ chmod +x $HOME/.local/share/applications/cursor.desktop
 mkdir -p ~/.local/share/kio
 mkdir -p ~/.local/share/kio/servicemenus
 curl -L $BASE_URL/openCursor.desktop -o $HOME/.local/share/kio/servicemenus/openCursor.desktop
-chmod +x $HOME/.local/share/applications/openCursor.desktop
+chmod +x $HOME/.local/share/kio/servicemenus/openCursor.desktop
 
 # echo "🔹 Creating update script for Cursor..."
 # sudo curl -L $BASE_URL/update-cursor.sh -o /opt/cursor/update-cursor.sh
