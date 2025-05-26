@@ -34,8 +34,10 @@ cat /proc/version
 
 # echo "🔹 Configuring swap (32GB)..."
 # sudo swapon --show
+# free -h
+# df -h
 # sudo swapoff -a
-#
+
 # # Check if swapfile already exists with correct size
 # SWAP_SIZE=$(sudo du -h /swapfile 2>/dev/null | awk '{print $1}' | tr -d 'G')
 # if [ "$SWAP_SIZE" != "32" ]; then
@@ -46,9 +48,19 @@ cat /proc/version
 # fi
 # sudo swapon /swapfile
 
-if ! grep -q "/swapfile" /etc/fstab; then
-    echo "/swapfile none swap sw 0 0" | sudo tee -a /etc/fstab
-fi
+# if ! grep -q "/swapfile" /etc/fstab; then
+#     sudo cp /etc/fstab /etc/fstab.bak
+#     echo "/swapfile swap swap sw 0 0" | sudo tee -a /etc/fstab
+# fi
+
+cat /proc/sys/vm/swappiness
+sudo sysctl vm.swappiness=10
+cat /proc/sys/vm/vfs_cache_pressure
+sudo sysctl vm.vfs_cache_pressure=50
+sudo tee -a /etc/sysctl.conf <<< \
+"
+vm.swappiness=10
+vm.vfs_cache_pressure=50"
 
 echo "🔹 System optimization completed successfully!"
 echo "🔹 It is recommended to reboot your system to apply all changes."
