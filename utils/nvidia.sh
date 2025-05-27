@@ -20,7 +20,7 @@ sudo apt install -y \
   libglu1-mesa-dev libfreeimage-dev libglfw3-dev libgles-dev libgles1 \
   libglvnd-core-dev libglx-dev libopengl-dev
 
-sudo apt install software-properties-qt # for kde qt, for gnome gtk
+sudo apt install software-properties-gtk # for kde qt, for gnome gtk
 
 sudo add-apt-repository -y ppa:graphics-drivers/ppa
 # sudo add-apt-repository -y ppa:oibaf/graphics-drivers
@@ -29,11 +29,11 @@ sudo dpkg --add-architecture i386
 sudo apt update
 sudo apt full-upgrade -y
 sudo apt install --reinstall -y xserver-xorg-video-all xserver-xorg-video-nouveau \
-  xserver-xorg-video-intel xserver-xorg-video-nvidia-550
+  xserver-xorg-video-intel xserver-xorg-video-nvidia-570
 sudo apt-key del 7fa2af80
 # install drivers NVIDIA
-sudo apt install -y nvidia-driver-550 nvidia-headless-550 nvidia-dkms-550 \
-  nvidia-utils-550
+sudo apt install -y nvidia-driver-570 nvidia-headless-570 nvidia-dkms-570 \
+  nvidia-utils-570
 sudo apt install -y nvidia-settings nvidia-prime \
   libnvidia-egl-wayland1 # nvidia-vulkan-icd nvidia-driver-libs
 
