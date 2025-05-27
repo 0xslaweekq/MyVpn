@@ -4,11 +4,6 @@ set -e
 
 sudo apt update
 
-echo "🔹 System optimization script..."
-command_exists() {
-    command -v "$1" &> /dev/null
-}
-
 echo "🔹 Installing xanmod kernel..."
 if ! dpkg -l | grep -q "linux-xanmod"; then
     wget -qO - https://dl.xanmod.org/archive.key | sudo gpg --dearmor -vo /etc/apt/keyrings/xanmod-kernel.gpg
