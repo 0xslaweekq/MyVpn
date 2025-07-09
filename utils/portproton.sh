@@ -11,7 +11,7 @@ sudo apt update
 sudo apt upgrade -y
 sudo apt install -y \
   dkms linux-headers-$(uname -r) meson libsystemd-dev pkg-config ninja-build git \
-  libdbus-1-dev libinih-dev build-essential curl file libc6 libnss3 policykit-1 \
+  libdbus-1-dev libinih-dev build-essential curl file libc6 libnss3 \
   xz-utils bubblewrap mesa-utils icoutils tar libvulkan1:{i386,amd64} zstd \
   cabextract xdg-utils openssl libgl1:{i386,amd64} libpoppler-glib8:{i386,amd64} \
   libgtk-3-dev glslang-tools \

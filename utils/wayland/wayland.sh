@@ -207,6 +207,12 @@ echo "Экспериментальные функции: $(gsettings get org.gno
 echo "Сглаживание шрифтов: $(gsettings get org.gnome.desktop.interface font-antialiasing)"
 echo ""
 
+# === ТЕКУЩИЕ НАСТРОЙКИ ===
+# Масштаб интерфейса: uint32 1
+# Масштаб текста: 1.0
+# Экспериментальные функции: ['scale-monitor-framebuffer', 'xwayland-native-scaling']
+# Сглаживание шрифтов: 'grayscale'
+
 # Restart system to apply settings
 echo "Script completed. Restart your system to apply changes. Restart now? (y/n)"
 read -r RESTART
