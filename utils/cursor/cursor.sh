@@ -13,7 +13,7 @@ echo "Downloading Cursor AppImage..."
 sudo mkdir -p /opt/cursor
 CURSOR_DIR=/opt/cursor/cursor.AppImage
 sudo rm -rf $CURSOR_DIR
-sudo curl -L https://downloads.cursor.com/production/a8e95743c5268be73767c46944a71f4465d05c90/linux/x64/Cursor-1.2.4-x86_64.AppImage -o $CURSOR_DIR
+sudo curl -L https://downloads.cursor.com/production/410000a83355c025daba0c6156955bf08687d081/linux/x64/Cursor-1.3.0-x86_64.AppImage -o $CURSOR_DIR
 sudo ln -sf $CURSOR_DIR /usr/local/bin/cursor
 sudo chmod +x /usr/local/bin/cursor
 
@@ -27,7 +27,7 @@ sudo curl -L $BASE_URL/cursor.png -o /opt/cursor/cursor.png
 
 echo "🔹 Creating .desktop entry for Cursor..."
 mkdir -p "$HOME/.local/share/applications"
-rm $HOME/.local/share/applications/cursor.desktop
+rm -f $HOME/.local/share/applications/cursor.desktop
 curl -L $BASE_URL/cursor.desktop -o $HOME/.local/share/applications/cursor.desktop
 chmod +x $HOME/.local/share/applications/cursor.desktop
 
@@ -35,19 +35,6 @@ mkdir -p ~/.local/share/kio
 mkdir -p ~/.local/share/kio/servicemenus
 curl -L $BASE_URL/openCursor.desktop -o $HOME/.local/share/kio/servicemenus/openCursor.desktop
 chmod +x $HOME/.local/share/kio/servicemenus/openCursor.desktop
-
-# echo "🔹 Creating update script for Cursor..."
-# sudo curl -L $BASE_URL/update-cursor.sh -o /opt/cursor/update-cursor.sh
-# sudo chmod +x /opt/cursor/update-cursor.sh
-
-# echo "🔹 Creating update service for Cursor..."
-# sudo curl -L $BASE_URL/update-cursor.service -o /etc/systemd/system/update-cursor.service
-# sudo systemctl daemon-reload
-# sudo systemctl enable update-cursor
-# sudo systemctl start update-cursor
-# sudo systemctl status update-cursor
-# sudo systemctl stop update-cursor
-# sudo systemctl disable update-cursor
 
 xdg-mime default cursor.desktop text/plain
 xdg-mime default cursor.desktop application/x-shellscript
