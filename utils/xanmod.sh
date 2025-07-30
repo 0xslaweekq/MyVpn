@@ -52,10 +52,13 @@ cat /proc/sys/vm/swappiness
 sudo sysctl vm.swappiness=10
 cat /proc/sys/vm/vfs_cache_pressure
 sudo sysctl vm.vfs_cache_pressure=50
+cat /proc/sys/fs/inotify/max_user_watches
+sudo sysctl fs.inotify.max_user_watches=524288
 sudo tee -a /etc/sysctl.conf <<< \
 "
 vm.swappiness=10
-vm.vfs_cache_pressure=50"
+vm.vfs_cache_pressure=50
+fs.inotify.max_user_watches=524288"
 
 echo "🔹 System optimization completed successfully!"
 echo "🔹 It is recommended to reboot your system to apply all changes."
