@@ -25,7 +25,7 @@ echo '#################################################################'
 # SB_IMAGE: The Outline Server Docker image to install, e.g. quay.io/outline/shadowbox:nightly
 # CONTAINER_NAME: Docker instance name for shadowbox (default shadowbox).
 #     For multiple instances also change SHADOWBOX_DIR to an other location
-#     e.g. CONTAINER_NAME=shadowbox-inst1 SHADOWBOX_DIR=/opt/cursor/outline/inst1
+#     e.g. CONTAINER_NAME=shadowbox-inst1 SHADOWBOX_DIR=/opt/outline/inst1
 # SHADOWBOX_DIR: Directory for persistent Outline Server state.
 # ACCESS_CONFIG: The location of the access config text file.
 # SB_DEFAULT_SERVER_NAME: Default name for this server, e.g. "Outline server New York".
@@ -164,6 +164,7 @@ function fetch() {
 function install_docker() {
   (
     # Change umask so that /usr/share/keyrings/docker-archive-keyring.gpg has the right permissions.
+    # See https://github.com/Jigsaw-Code/outline-server/issues/951.
     # We do this in a subprocess so the umask for the calling process is unaffected.
     umask 0022
     fetch https://get.docker.com/ | sh
@@ -326,6 +327,7 @@ docker_command=(
 
   # Used by Watchtower to know which containers to monitor.
   --label 'com.centurylinklabs.watchtower.enable=true'
+  --label 'com.centurylinklabs.watchtower.scope=outline'
 
   # Use log rotation. See https://docs.docker.com/config/containers/logging/configure/.
   --log-driver local
@@ -373,10 +375,12 @@ function start_watchtower() {
   # testing).  Otherwise refresh every hour.
   local -ir WATCHTOWER_REFRESH_SECONDS="${WATCHTOWER_REFRESH_SECONDS:-3600}"
   local -ar docker_watchtower_flags=(--name watchtower --log-driver local --restart always \
+      --label 'com.centurylinklabs.watchtower.enable=true' \
+      --label 'com.centurylinklabs.watchtower.scope=outline' \
       -v /var/run/docker.sock:/var/run/docker.sock)
   # By itself, local messes up the return code.
   local STDERR_OUTPUT
-  STDERR_OUTPUT="$(docker run -d "${docker_watchtower_flags[@]}" containrrr/watchtower --cleanup --label-enable --tlsverify --interval "${WATCHTOWER_REFRESH_SECONDS}" 2>&1 >/dev/null)" && return
+  STDERR_OUTPUT="$(docker run -d "${docker_watchtower_flags[@]}" containrrr/watchtower --cleanup --label-enable --scope=outline --tlsverify --interval "${WATCHTOWER_REFRESH_SECONDS}" 2>&1 >/dev/null)" && return
   readonly STDERR_OUTPUT
   log_error "FAILED"
   if docker_container_exists watchtower; then
@@ -440,6 +444,7 @@ Make sure to open the following ports on your firewall, router or cloud provider
 function set_hostname() {
   # These are URLs that return the client's apparent IP address.
   # We have more than one to try in case one starts failing
+  # (e.g. https://github.com/Jigsaw-Code/outline-server/issues/776).
   local -ar urls=(
     'https://icanhazip.com/'
     'https://ipinfo.io/ip'
@@ -469,7 +474,7 @@ install_shadowbox() {
   run_step "Verifying that Docker daemon is running" verify_docker_running
 
   log_for_sentry "Creating Outline directory"
-  export SHADOWBOX_DIR="${SHADOWBOX_DIR:-/opt/cursor/outline}"
+  export SHADOWBOX_DIR="${SHADOWBOX_DIR:-/opt/outline}"
   mkdir -p "${SHADOWBOX_DIR}"
   chmod u+s,ug+rwx,o-rwx "${SHADOWBOX_DIR}"
 
