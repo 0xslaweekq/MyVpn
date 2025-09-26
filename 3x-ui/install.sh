@@ -235,10 +235,9 @@ install_x-ui() {
 
     echo -e "${green}x-ui ${tag_version}${plain} installation finished, it is running now..."
     echo -e ""
-    echo -e "
-┌──────────────────────────────────────────────────────────────────────┐
+    echo -e "┌───────────────────────────────────────────────────────┐
 │  ${blue}x-ui control menu usages (subcommands):${plain}              │
-│                                                                      │
+│                                                       │
 │  ${blue}x-ui${plain}              - Admin Management Script          │
 │  ${blue}x-ui start${plain}        - Start                            │
 │  ${blue}x-ui stop${plain}         - Stop                             │
@@ -253,7 +252,7 @@ install_x-ui() {
 │  ${blue}x-ui legacy${plain}       - legacy version                   │
 │  ${blue}x-ui install${plain}      - Install                          │
 │  ${blue}x-ui uninstall${plain}    - Uninstall                        │
-└──────────────────────────────────────────────────────────────────────┘"
+└───────────────────────────────────────────────────────┘"
 }
 
 echo -e "${green}Running...${plain}"
