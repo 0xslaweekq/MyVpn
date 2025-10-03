@@ -1,58 +1,53 @@
 #!/bin/bash
-set -e
 
-if ! [ -f /opt/cursor.AppImage ]; then
-    echo "🔹 Installing Cursor AI IDE..."
-    sudo apt update
-    sudo apt install -y curl wget
+set -e # Exit on error
 
-    echo "Downloading Cursor AppImage..."
-    sudo curl -L https://downloader.cursor.sh/linux/appImage/x64 -o /opt/cursor.AppImage
-    sudo chmod +x /opt/cursor.AppImage
+echo "🔹 Installing Cursor AI IDE..."
+sudo apt update
+sudo apt install -y curl gpg wget
 
-    echo "Downloading Cursor icon..."
-    sudo curl -L https://raw.githubusercontent.com/rahuljangirwork/copmany-logos/refs/heads/main/cursor.png -o /opt/cursor.png
+echo "Downloading Cursor AppImage..."
+sudo mkdir -p /opt/cursor
+CURSOR_DIR=/opt/cursor/cursor.AppImage
+sudo rm -rf $CURSOR_DIR
+sudo curl -L https://downloads.cursor.com/production/823f58d4f60b795a6aefb9955933f3a2f0331d7b/linux/x64/Cursor-1.5.5-x86_64.AppImage -o $CURSOR_DIR
+sudo ln -sf $CURSOR_DIR /usr/local/bin/cursor
+sudo chmod +x /usr/local/bin/cursor
 
-    echo "Creating .desktop entry for Cursor..."
-    mkdir -p "$HOME/.local/share/applications"
-    bash -c "cat > $HOME/.local/share/applications/cursor.desktop" <<EOL
-[Desktop Entry]
-Name=Cursor AI IDE
-Exec=/opt/cursor.AppImage --no-sandbox
-Icon=/opt/cursor.png
-Terminal=false
-Type=Application
-Categories=Development;
-MimeType=text/plain;
-EOL
+    TMP_DIR=$(mktemp -d)
+    cd $TMP_DIR
+    "/opt/cursor/cursor.AppImage" --appimage-extract >/dev/null 2>&1
 
-    xdg-mime default cursor.desktop text/plain
-    xdg-mime default cursor.desktop application/x-shellscript
-    xdg-mime default cursor.desktop text/x-script.python
-    xdg-mime default cursor.desktop text/javascript
-    xdg-mime default cursor.desktop text/x-c
-    xdg-mime default cursor.desktop text/x-c++
-    xdg-mime default cursor.desktop text/x-java
+BASE_URL=https://raw.githubusercontent.com/0xSlaweekq/MyVpn/main/utils/cursor
+echo "Downloading Cursor icon..."
+sudo curl -L $BASE_URL/cursor.png -o /opt/cursor/cursor.png
 
-    # Set Cursor as default editor for git commit messages
-    git config --global core.editor "/opt/cursor.AppImage --wait"
+echo "🔹 Creating .desktop entry for Cursor..."
+mkdir -p "$HOME/.local/share/applications"
+rm -f $HOME/.local/share/applications/cursor.desktop
+curl -L $BASE_URL/cursor.desktop -o $HOME/.local/share/applications/cursor.desktop
+chmod +x $HOME/.local/share/applications/cursor.desktop
 
-    update-desktop-database "$HOME/.local/share/applications"
+mkdir -p ~/.local/share/kio
+mkdir -p ~/.local/share/kio/servicemenus
+curl -L $BASE_URL/openCursor.desktop -o $HOME/.local/share/kio/servicemenus/openCursor.desktop
+chmod +x $HOME/.local/share/kio/servicemenus/openCursor.desktop
 
-    echo "Adding alias for Cursor..."
-    BASHRC_FILE="$HOME/.bashrc"
-    ALIAS_LINE="alias cursor='/opt/cursor.AppImage --no-sandbox'"
+xdg-mime default cursor.desktop text/plain
+xdg-mime default cursor.desktop application/x-shellscript
+xdg-mime default cursor.desktop text/x-script.python
+xdg-mime default cursor.desktop text/javascript
+xdg-mime default cursor.desktop text/x-c
+xdg-mime default cursor.desktop text/x-c++
+xdg-mime default cursor.desktop text/x-java
 
-    if ! grep -q "alias cursor=" "$BASHRC_FILE"; then
-        echo "$ALIAS_LINE" >> "$BASHRC_FILE"
-        echo "Alias 'cursor' added to .bashrc"
-        echo "You can now run Cursor by typing 'cursor' in terminal after restarting your shell or running 'source ~/.bashrc'"
-    else
-        echo "Alias 'cursor' already exists in .bashrc"
-    fi
+Update MIME and icon databases
+echo "Updating system databases..."
+update-mime-database "$HOME/.local/share/mime"
+update-desktop-database "$HOME/.local/share/applications"
+gtk-update-icon-cache -f -t "$HOME/.local/share/icons"
 
-    echo "Cursor AI IDE installation complete. You can find it in your application menu."
-    source "$BASHRC_FILE"
-else
-    echo "🔹 Cursor AI IDE is already installed."
-fi
+# Set Cursor as default editor for git commit messages
+git config --global core.editor "cursor --wait"
+
+echo "Cursor AI IDE installation complete. You can find it in your application menu."

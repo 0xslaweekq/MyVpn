@@ -1,9 +1,0 @@
-[Unit]
-Description=Update Cursor
-
-[Service]
-ExecStart=/opt/cursor/update-cursor.sh
-Type=oneshot
-
-[Install]
-WantedBy=multi-user.target
