@@ -6,14 +6,11 @@ sudo apt update
 
 echo "🔹 Installing xanmod kernel..."
 if ! dpkg -l | grep -q "linux-xanmod"; then
-    wget -qO - https://dl.xanmod.org/archive.key | sudo gpg --dearmor -vo /etc/apt/keyrings/xanmod-kernel.gpg
-    echo 'deb [signed-by=/etc/apt/keyrings/xanmod-kernel.gpg] http://deb.xanmod.org releases main' | sudo tee /etc/apt/sources.list.d/xanmod-release.list
+    wget -qO - https://dl.xanmod.org/archive.key | sudo gpg --dearmor -vo /etc/apt/keyrings/xanmod-archive-keyring.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/xanmod-archive-keyring.gpg] http://deb.xanmod.org $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/xanmod-release.list
     sudo apt update
-    # sudo apt install -y \
-    #     linux-xanmod-rt-x64v3 \
-    #     linux-xanmod-lts-x64v3 \
-    #     linux-xanmod-x64v3
     sudo apt install --reinstall -y linux-xanmod-lts-x64v3
+    sudo apt install --reinstall -y linux-xanmod-x64v3
     sudo update-initramfs -u
     sudo update-grub2
     sudo update-grub
@@ -26,6 +23,9 @@ sudo apt install -y -f
 sudo apt install --fix-broken -y
 echo "Current kernel version:"
 cat /proc/version
+
+echo "deb [signed-by=/etc/apt/keyrings/xanmod-archive-keyring.gpg] http://deb.xanmod.org $(lsb_release -sc) main non-free" | sudo tee /etc/apt/sources.list.d/xanmod-release.list
+sudo apt update && sudo apt install nvidia-driver-580
 
 # echo "🔹 Configuring swap (32GB)..."
 # sudo swapon --show
@@ -67,18 +67,12 @@ if [[ $RESTART == "y" || $RESTART == "Y" ]]; then
     sudo reboot
 else
     echo "Please reboot your system manually later to apply all changes."
+    echo " after reboot, run:"
+    echo " echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
 fi
+# sudo grep "menuentry 'Ubuntu," /boot/grub/grub.cfg | sed 's/^[ \t]*//;s/[ \t]*$//' | awk -F"'" '{print $2}' | awk '{printf "%1d %s\n", (NR-2)+1, $0}'
 
-# Liquorix Kernel:
-# curl -s 'https://liquorix.net/install-liquorix.sh' | sudo bash
-# sudo add-apt-repository ppa:liquorix-team/liquorix
-# sudo apt update
-# sudo apt install linux-image-liquorix-amd64
 
-# Zen Kernel:
-# sudo add-apt-repository ppa:teejee2008/ppa
-# sudo apt update
-# sudo apt install linux-zen
 
 # mainline kernel
 # sudo add-apt-repository ppa:teejee2008/ppa
@@ -95,7 +89,20 @@ fi
 #     echo "Mainline is already installed."
 # fi
 
-# dpkg -l | grep linux-image
-# srp linux-image-6.13.4-x64v3-xanmod1
-# sudo update-grub
-# supd
+# 1. Settings for gaming kernel:
+# # Create file settings
+# sudo nano /etc/sysctl.d/99-xanmod-gaming.conf
+
+# # Add the following lines:
+# vm.swappiness=10
+# vm.vfs_cache_pressure=50
+# kernel.sched_autogroup_enabled=0
+# kernel.sched_child_runs_first=0
+# kernel.sched_latency_ns=4000000
+# kernel.sched_migration_cost_ns=500000
+# kernel.sched_min_granularity_ns=500000
+# kernel.sched_wakeup_granularity_ns=1000000
+# kernel.sched_rt_runtime_us=950000
+
+# # Apply settings
+# sudo sysctl -p /etc/sysctl.d/99-xanmod-gaming.conf
