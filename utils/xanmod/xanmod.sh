@@ -9,8 +9,8 @@ if ! dpkg -l | grep -q "linux-xanmod"; then
     wget -qO - https://dl.xanmod.org/archive.key | sudo gpg --dearmor -vo /etc/apt/keyrings/xanmod-archive-keyring.gpg
     echo "deb [signed-by=/etc/apt/keyrings/xanmod-archive-keyring.gpg] http://deb.xanmod.org $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/xanmod-release.list
     sudo apt update
+    # sudo apt install --reinstall -y linux-xanmod-x64v3
     sudo apt install --reinstall -y linux-xanmod-lts-x64v3
-    sudo apt install --reinstall -y linux-xanmod-x64v3
     sudo update-initramfs -u
     sudo update-grub2
     sudo update-grub
