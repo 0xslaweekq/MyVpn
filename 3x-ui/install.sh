@@ -45,16 +45,20 @@ install_base() {
     ubuntu | debian | armbian)
         apt update && apt install -y -q wget curl tar tzdata
         ;;
-    centos | rhel | almalinux | rocky | ol)
-        yum -y update && yum install -y -q wget curl tar tzdata
-        ;;
-    fedora | amzn | virtuozzo)
+    fedora | amzn | virtuozzo | rhel | almalinux | rocky | ol)
         dnf -y update && dnf install -y -q wget curl tar tzdata
+        ;;
+    centos)
+    if [[ "${VERSION_ID}" =~ ^7 ]]; then
+        yum -y update && yum install -y wget curl tar tzdata
+    else
+        dnf -y update && dnf install -y -q wget curl tar tzdata
+    fi
         ;;
     arch | manjaro | parch)
         pacman -Syu && pacman -Syu --noconfirm wget curl tar tzdata
         ;;
-    opensuse-tumbleweed)
+    opensuse-tumbleweed | opensuse-leap)
         zypper refresh && zypper -q install -y wget curl tar timezone
         ;;
     alpine)
@@ -78,11 +82,11 @@ config_after_install() {
     local existing_port=$(/usr/local/x-ui/x-ui setting -show true | grep -Eo 'port: .+' | awk '{print $2}')
     local URL_lists=(
         "https://api4.ipify.org"
-		"https://ipv4.icanhazip.com"
-		"https://v4.api.ipinfo.io/ip"
-		"https://ipv4.myexternalip.com/raw"
-		"https://4.ident.me"
-		"https://check-host.net/ip"
+        "https://ipv4.icanhazip.com"
+        "https://v4.api.ipinfo.io/ip"
+        "https://ipv4.myexternalip.com/raw"
+        "https://4.ident.me"
+        "https://check-host.net/ip"
     )
     local server_ip=""
     for ip_address in "${URL_lists[@]}"; do
@@ -249,7 +253,7 @@ install_x-ui() {
 │  ${blue}x-ui log${plain}          - Check logs                       │
 │  ${blue}x-ui banlog${plain}       - Check Fail2ban ban logs          │
 │  ${blue}x-ui update${plain}       - Update                           │
-│  ${blue}x-ui legacy${plain}       - legacy version                   │
+│  ${blue}x-ui legacy${plain}       - Legacy version                   │
 │  ${blue}x-ui install${plain}      - Install                          │
 │  ${blue}x-ui uninstall${plain}    - Uninstall                        │
 └───────────────────────────────────────────────────────┘"

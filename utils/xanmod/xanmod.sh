@@ -28,6 +28,8 @@ echo "deb [signed-by=/etc/apt/keyrings/xanmod-archive-keyring.gpg] http://deb.xa
 sudo apt update && sudo apt install nvidia-driver-580
 
 # echo "🔹 Configuring swap (32GB)..."
+# lsblk -f
+# sudo nano /etc/fstab
 # sudo swapon --show
 # free -h
 # df -h
