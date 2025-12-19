@@ -41,6 +41,8 @@ else
     sudo systemctl daemon-reload
     source ~/.bashrc
 
+    mkdir -p $HOME/.docker
+    touch $HOME/.docker/config.json
     echo '{"credsStore":"pass"}' > "$HOME/.docker/config.json"
     # echo "Installing docker-volume-local-persist plugin..."
     # curl -fsSL https://raw.githubusercontent.com/MatchbookLab/local-persist/master/scripts/install.sh | sudo bash

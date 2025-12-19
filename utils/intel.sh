@@ -13,7 +13,7 @@ sudo apt update
 
 # Install the compute-related packages
 sudo apt install -y libigdgmm12
-sudo apt install -y libze1 intel-level-zero-gpu intel-opencl-icd clinfo
+sudo apt install -y libze1 intel-level-zero-gpu level-zero intel-opencl-icd clinfo
 sudo apt install -y libze-dev intel-ocloc
 
 clinfo | grep "Device Name"
@@ -26,7 +26,6 @@ sudo apt install -y qemu-kvm qemu-utils \
   virt-manager ovmf gir1.2-spiceclientgtk-3.0
 
 sudo apt install -y \
-  intel-opencl-icd intel-level-zero-gpu level-zero \
   libmfx1 libmfxgen1 libvpl2 va-driver-all vainfo \
   intel-gpu-tools intel-media-va-driver mesa-utils nvtop
 sudo update-grub

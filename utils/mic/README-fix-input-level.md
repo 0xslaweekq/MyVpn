@@ -27,23 +27,23 @@
 ### Полная настройка (один раз)
 
 ```bash
-./Linux/fix-input-level.sh
+./utils/mic/fix-input-level.sh
 ```
 
 ### Управление
 
 ```bash
 # Проверить статус
-./Linux/fix-input-level.sh --status
+./utils/mic/fix-input-level.sh --status
 
 # Перезапустить мониторинг
-./Linux/fix-input-level.sh --restart
+./utils/mic/fix-input-level.sh --restart
 
 # Остановить мониторинг
-./Linux/fix-input-level.sh --stop
+./utils/mic/fix-input-level.sh --stop
 
 # Протестировать восстановление
-./Linux/fix-input-level.sh --test
+./utils/mic/fix-input-level.sh --test
 ```
 
 ### Управление через systemd

@@ -29,11 +29,11 @@ sudo dpkg --add-architecture i386
 sudo apt update
 sudo apt full-upgrade -y
 sudo apt install --reinstall -y xserver-xorg-video-all xserver-xorg-video-nouveau \
-  xserver-xorg-video-intel xserver-xorg-video-nvidia-570
+  xserver-xorg-video-intel xserver-xorg-video-nvidia-580
 sudo apt-key del 7fa2af80
 # install drivers NVIDIA
-sudo apt install -y nvidia-driver-570 nvidia-headless-570 nvidia-dkms-570 \
-  nvidia-utils-570
+sudo apt install -y nvidia-driver-580-open nvidia-kernel-source-580-open \
+  nvidia-headless-580-open nvidia-dkms-580-open nvidia-utils-580
 sudo apt install -y nvidia-settings nvidia-prime \
   libnvidia-egl-wayland1 # nvidia-vulkan-icd nvidia-driver-libs
 
