@@ -1,8 +1,10 @@
 #!/bin/bash
 
 sudo mkdir -pm755 /etc/apt/keyrings
-sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
-sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/noble/winehq-noble.sources
+wget -qO - https://dl.winehq.org/wine-builds/winehq.key | sudo gpg --dearmor -o /etc/apt/keyrings/winehq-archive.key -
+sudo dpkg --add-architecture i386
+sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/plucky/winehq-plucky.sources
+
 sudo apt update
 sudo apt upgrade -y
 
@@ -15,6 +17,7 @@ sudo apt install -y \
   libgl1-mesa-glx:{i386,amd64}
 sudo apt install --fix-broken -y
 
+cd ~
 git clone --recursive https://github.com/HansKristian-Work/vkd3d-proton
 cd vkd3d-proton
 chmod +x ./package-release.sh
