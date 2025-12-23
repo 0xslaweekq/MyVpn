@@ -10,34 +10,86 @@ echo "================================================================="
 echo "Решение проблемы автоматического изменения уровня входа микрофона"
 echo "================================================================="
 
+# Функция для определения активного микрофона
+detect_active_microphone() {
+    # Сначала пытаемся найти активный микрофон (помеченный звездочкой)
+    # Ищем в разделе Filters (для Bluetooth) и Sources
+    MIC_ID=$(wpctl status 2>/dev/null | grep -E "^\s+\*.*\[Audio/Source\]" | head -1 | sed -E 's/.*[[:space:]]+([0-9]+)\..*/\1/')
+
+    if [ -z "$MIC_ID" ] || [ "$MIC_ID" -le 0 ] 2>/dev/null; then
+        # Пытаемся найти в разделе Sources (активный)
+        MIC_ID=$(wpctl status 2>/dev/null | grep -A 20 "Sources:" | grep -E "^\s+\*" | head -1 | sed -E 's/.*[[:space:]]+([0-9]+)\..*/\1/')
+    fi
+
+    if [ -z "$MIC_ID" ] || [ "$MIC_ID" -le 0 ] 2>/dev/null; then
+        # Пытаемся найти Bluetooth микрофон
+        MIC_ID=$(wpctl status 2>/dev/null | grep -E "bluez_input\." | head -1 | sed -E 's/.*[[:space:]]+([0-9]+)\..*/\1/')
+    fi
+
+    if [ -z "$MIC_ID" ] || [ "$MIC_ID" -le 0 ] 2>/dev/null; then
+        # Пытаемся найти по имени AirPods
+        MIC_ID=$(wpctl status 2>/dev/null | grep -i "airpods" | grep -E "Sources:|Filters:" -A 5 | grep -E "^\s+[0-9]+\." | head -1 | sed -E 's/.*[[:space:]]+([0-9]+)\..*/\1/')
+    fi
+
+    if [ -z "$MIC_ID" ] || [ "$MIC_ID" -le 0 ] 2>/dev/null; then
+        # Пытаемся найти по старому имени
+        MIC_ID=$(wpctl status 2>/dev/null | grep "Headphones Stereo Microphone" | head -1 | sed -E 's/.*[[:space:]]+([0-9]+)\..*/\1/')
+    fi
+
+    # Получаем имя микрофона для отображения
+    if [ ! -z "$MIC_ID" ] && [ "$MIC_ID" -gt 0 ] 2>/dev/null; then
+        # Сначала пытаемся получить понятное имя через pactl
+        MIC_PACTL_NAME=$(wpctl status 2>/dev/null | grep -E "[[:space:]]+$MIC_ID\." | sed -E 's/.*[0-9]+\.\s+([^[:space:]]+).*/\1/' | head -1)
+
+        # Если это Bluetooth устройство, пытаемся получить описание
+        if echo "$MIC_PACTL_NAME" | grep -q "bluez"; then
+            MIC_NAME=$(pactl list sources 2>/dev/null | grep -A 10 "$MIC_PACTL_NAME" | grep "Description:" | sed 's/.*Description: //' | head -1)
+        fi
+
+        # Если не получили описание, используем имя из wpctl
+        if [ -z "$MIC_NAME" ]; then
+            MIC_NAME=$(wpctl status 2>/dev/null | grep -E "[[:space:]]+$MIC_ID\." | sed -E 's/.*[0-9]+\.\s+([^[:space:]]+).*/\1/' | head -1)
+        fi
+
+        # Если все еще пусто, используем ID
+        if [ -z "$MIC_NAME" ]; then
+            MIC_NAME="ID $MIC_ID"
+        fi
+    fi
+
+    echo "$MIC_ID|$MIC_NAME"
+}
+
 # Функция для фиксации уровня входа
 fix_input_level() {
     echo "Фиксация уровня входа микрофона..."
 
-    # Находим ID микрофона
-    MIC_ID=$(wpctl status | grep "Headphones Stereo Microphone" | head -1 | awk '{print $3}' | sed 's/[^0-9]//g')
+    # Определяем активный микрофон
+    MIC_INFO=$(detect_active_microphone)
+    MIC_ID=$(echo "$MIC_INFO" | cut -d'|' -f1)
+    MIC_NAME=$(echo "$MIC_INFO" | cut -d'|' -f2)
 
     if [ ! -z "$MIC_ID" ] && [ "$MIC_ID" -gt 0 ] 2>/dev/null; then
-        echo "Найден микрофон ID: $MIC_ID"
+        echo "Найден микрофон: $MIC_NAME (ID: $MIC_ID)"
 
         # Устанавливаем максимальный уровень
-        wpctl set-volume "$MIC_ID" 1.0
+        wpctl set-volume "$MIC_ID" 1.0 2>/dev/null
         echo "✓ Уровень установлен на 100%"
 
         # Убеждаемся что не заглушен
-        wpctl set-mute "$MIC_ID" 0
+        wpctl set-mute "$MIC_ID" 0 2>/dev/null
         echo "✓ Микрофон включен"
     else
         echo "⚠️  Микрофон не найден по ID, используем общие настройки"
     fi
 
-    # Также через pactl
-    pactl set-source-volume @DEFAULT_SOURCE@ 100%
-    pactl set-source-mute @DEFAULT_SOURCE@ 0
+    # Также через pactl (работает с любым микрофоном, включая Bluetooth)
+    pactl set-source-volume @DEFAULT_SOURCE@ 100% 2>/dev/null
+    pactl set-source-mute @DEFAULT_SOURCE@ 0 2>/dev/null
     echo "✓ Уровень через PulseAudio установлен"
 
-    # Через ALSA для надежности
-    amixer -c 1 sset "Capture" 100% 2>/dev/null || echo "⚠️  ALSA настройка недоступна"
+    # Через ALSA для надежности (только для ALSA устройств)
+    amixer -c 1 sset "Capture" 100% 2>/dev/null || echo "⚠️  ALSA настройка недоступна (нормально для Bluetooth)"
 }
 
 # Создаем эффективный мониторинг уровня входа
@@ -51,14 +103,40 @@ create_level_keeper() {
 # Автор: 0xSlaweekq
 
 LOGFILE="/tmp/mic-level-keeper.log"
-MIC_NAME="Headphones Stereo Microphone"
+
+# Функция для определения активного микрофона
+detect_active_mic() {
+    # Сначала пытаемся найти активный микрофон (помеченный звездочкой)
+    MIC_ID=$(wpctl status 2>/dev/null | grep -E "^\s+\*.*\[Audio/Source\]" | head -1 | sed -E 's/.*[[:space:]]+([0-9]+)\..*/\1/')
+
+    if [ -z "$MIC_ID" ] || [ "$MIC_ID" -le 0 ] 2>/dev/null; then
+        # Пытаемся найти в разделе Sources (активный)
+        MIC_ID=$(wpctl status 2>/dev/null | grep -A 20 "Sources:" | grep -E "^\s+\*" | head -1 | sed -E 's/.*[[:space:]]+([0-9]+)\..*/\1/')
+    fi
+
+    if [ -z "$MIC_ID" ] || [ "$MIC_ID" -le 0 ] 2>/dev/null; then
+        # Пытаемся найти Bluetooth микрофон
+        MIC_ID=$(wpctl status 2>/dev/null | grep -E "bluez_input\." | head -1 | sed -E 's/.*[[:space:]]+([0-9]+)\..*/\1/')
+    fi
+
+    if [ -z "$MIC_ID" ] || [ "$MIC_ID" -le 0 ] 2>/dev/null; then
+        # Пытаемся найти по имени AirPods
+        MIC_ID=$(wpctl status 2>/dev/null | grep -i "airpods" | grep -E "Sources:|Filters:" -A 5 | grep -E "^\s+[0-9]+\." | head -1 | sed -E 's/.*[[:space:]]+([0-9]+)\..*/\1/')
+    fi
+
+    if [ -z "$MIC_ID" ] || [ "$MIC_ID" -le 0 ] 2>/dev/null; then
+        # Пытаемся найти по старому имени
+        MIC_ID=$(wpctl status 2>/dev/null | grep "Headphones Stereo Microphone" | head -1 | sed -E 's/.*[[:space:]]+([0-9]+)\..*/\1/')
+    fi
+
+    echo "$MIC_ID"
+}
 
 echo "$(date): Starting microphone level keeper" >> "$LOGFILE"
-echo "$(date): Monitoring microphone: $MIC_NAME" >> "$LOGFILE"
 
 while true; do
     # Находим ID микрофона каждый раз заново (может измениться при перезапуске PipeWire)
-    MIC_ID=$(wpctl status | grep "Headphones Stereo Microphone" | head -1 | awk '{print $3}' | sed 's/[^0-9]//g')
+    MIC_ID=$(detect_active_mic)
 
     if [ ! -z "$MIC_ID" ] && [ "$MIC_ID" -gt 0 ] 2>/dev/null; then
         # Получаем текущий уровень
@@ -231,13 +309,24 @@ start_monitoring() {
 
     # Останавливаем старые процессы
     pkill -f mic-level-keeper 2>/dev/null || true
+    sleep 0.5
 
-    # Запускаем новый процесс
-    ~/.local/bin/mic-level-keeper &
-    MONITOR_PID=$!
-    echo "$MONITOR_PID" > ~/.local/share/mic-level-keeper.pid
-
-    echo "✓ Мониторинг запущен (PID: $MONITOR_PID)"
+    # Запускаем через systemd
+    if systemctl --user start mic-level-keeper.service 2>/dev/null; then
+        sleep 0.5
+        SERVICE_PID=$(systemctl --user show mic-level-keeper.service -p MainPID --value 2>/dev/null)
+        if [ ! -z "$SERVICE_PID" ] && [ "$SERVICE_PID" != "0" ]; then
+            echo "✓ Мониторинг запущен через systemd (PID: $SERVICE_PID)"
+        else
+            echo "✓ Мониторинг запущен через systemd"
+        fi
+    else
+        # Fallback: запускаем вручную, если systemd не работает
+        ~/.local/bin/mic-level-keeper &
+        MONITOR_PID=$!
+        echo "$MONITOR_PID" > ~/.local/share/mic-level-keeper.pid
+        echo "✓ Мониторинг запущен вручную (PID: $MONITOR_PID)"
+    fi
 }
 
 # Функция для проверки состояния
@@ -247,11 +336,13 @@ check_status() {
     echo "================================================================="
 
     echo "--- Текущий уровень микрофона ---"
-    MIC_ID=$(wpctl status | grep "Headphones Stereo Microphone" | head -1 | awk '{print $3}' | sed 's/[^0-9]//g')
-    if [ ! -z "$MIC_ID" ]; then
+    MIC_INFO=$(detect_active_microphone)
+    MIC_ID=$(echo "$MIC_INFO" | cut -d'|' -f1)
+    MIC_NAME=$(echo "$MIC_INFO" | cut -d'|' -f2)
+    if [ ! -z "$MIC_ID" ] && [ "$MIC_ID" -gt 0 ] 2>/dev/null; then
         CURRENT_VOLUME=$(wpctl get-volume "$MIC_ID" 2>/dev/null | awk '{print $2}')
         CURRENT_PERCENT=$(echo "$CURRENT_VOLUME * 100" | bc -l 2>/dev/null | cut -d. -f1)
-        echo "Микрофон ID: $MIC_ID"
+        echo "Микрофон: $MIC_NAME (ID: $MIC_ID)"
         echo "Текущий уровень: ${CURRENT_PERCENT}%"
     else
         echo "❌ Микрофон не найден"
@@ -260,12 +351,16 @@ check_status() {
     echo -e "\n--- Статус мониторинга ---"
     # Проверяем через systemd сервис
     if systemctl --user is-active mic-level-keeper.service >/dev/null 2>&1; then
-        SERVICE_PID=$(systemctl --user show mic-level-keeper.service -p MainPID --value)
-        echo "✅ Мониторинг активен через systemd (PID: $SERVICE_PID)"
+        SERVICE_PID=$(systemctl --user show mic-level-keeper.service -p MainPID --value 2>/dev/null)
+        if [ ! -z "$SERVICE_PID" ] && [ "$SERVICE_PID" != "0" ]; then
+            echo "✅ Мониторинг активен через systemd (PID: $SERVICE_PID)"
+        else
+            echo "✅ Мониторинг активен через systemd"
+        fi
     elif [ -f ~/.local/share/mic-level-keeper.pid ]; then
-        pid=$(cat ~/.local/share/mic-level-keeper.pid)
-        if ps -p $pid > /dev/null 2>&1; then
-            echo "✅ Мониторинг активен (PID: $pid)"
+        pid=$(cat ~/.local/share/mic-level-keeper.pid 2>/dev/null)
+        if [ ! -z "$pid" ] && ps -p "$pid" > /dev/null 2>&1; then
+            echo "✅ Мониторинг активен вручную (PID: $pid)"
         else
             echo "❌ Мониторинг не активен"
         fi
@@ -276,10 +371,12 @@ check_status() {
     echo -e "\n--- Системный сервис ---"
     if systemctl --user is-enabled mic-level-keeper.service >/dev/null 2>&1; then
         echo "✅ Автозапуск включен"
-        if systemctl --user is-active mic-level-keeper.service >/dev/null 2>&1; then
+        # Проверяем статус более надежно
+        SERVICE_STATUS=$(systemctl --user is-active mic-level-keeper.service 2>&1)
+        if [ "$SERVICE_STATUS" = "active" ]; then
             echo "✅ Сервис активен"
         else
-            echo "⚠️  Сервис неактивен"
+            echo "⚠️  Сервис неактивен (статус: $SERVICE_STATUS)"
         fi
     else
         echo "❌ Автозапуск отключен"
@@ -366,8 +463,14 @@ case "${1:-}" in
         ;;
     --stop)
         echo "Остановка мониторинга..."
-        pkill -f mic-level-keeper 2>/dev/null && echo "✓ Процесс остановлен" || echo "Процесс не найден"
-        systemctl --user stop mic-level-keeper 2>/dev/null && echo "✓ Сервис остановлен" || echo "Сервис не был запущен"
+        # Останавливаем systemd сервис
+        if systemctl --user stop mic-level-keeper.service 2>/dev/null; then
+            echo "✓ Systemd сервис остановлен"
+        else
+            echo "⚠️  Systemd сервис не был запущен"
+        fi
+        # Останавливаем процессы, запущенные вручную (если есть)
+        pkill -f mic-level-keeper 2>/dev/null && echo "✓ Ручные процессы остановлены" || true
         rm -f ~/.local/share/mic-level-keeper.pid
         exit 0
         ;;
@@ -379,16 +482,19 @@ case "${1:-}" in
         ;;
     --test)
         echo "Тестирование восстановления уровня..."
-        MIC_ID=$(wpctl status | grep "Headphones Stereo Microphone" | head -1 | awk '{print $3}' | sed 's/[^0-9]//g')
-        if [ ! -z "$MIC_ID" ]; then
+        MIC_INFO=$(detect_active_microphone)
+        MIC_ID=$(echo "$MIC_INFO" | cut -d'|' -f1)
+        MIC_NAME=$(echo "$MIC_INFO" | cut -d'|' -f2)
+        if [ ! -z "$MIC_ID" ] && [ "$MIC_ID" -gt 0 ] 2>/dev/null; then
+            echo "Тестируем микрофон: $MIC_NAME (ID: $MIC_ID)"
             echo "Снижаем уровень до 20%..."
-            wpctl set-volume "$MIC_ID" 0.2
+            wpctl set-volume "$MIC_ID" 0.2 2>/dev/null
             echo "Ждем 3 секунды восстановления..."
             sleep 3
-            CURRENT_VOLUME=$(wpctl get-volume "$MIC_ID" | awk '{print $2}')
-            CURRENT_PERCENT=$(echo "$CURRENT_VOLUME * 100" | bc -l | cut -d. -f1)
+            CURRENT_VOLUME=$(wpctl get-volume "$MIC_ID" 2>/dev/null | awk '{print $2}')
+            CURRENT_PERCENT=$(echo "$CURRENT_VOLUME * 100" | bc -l 2>/dev/null | cut -d. -f1)
             echo "Текущий уровень: ${CURRENT_PERCENT}%"
-            if [ "$CURRENT_PERCENT" -gt 90 ]; then
+            if [ ! -z "$CURRENT_PERCENT" ] && [ "$CURRENT_PERCENT" -gt 90 ] 2>/dev/null; then
                 echo "✅ Тест ПРОШЕЛ! Уровень восстановился."
             else
                 echo "❌ Тест НЕ ПРОШЕЛ! Уровень не восстановился."
