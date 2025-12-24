@@ -10,12 +10,54 @@ echo "================================================================="
 echo "Решение проблемы автоматического изменения уровня входа микрофона"
 echo "================================================================="
 
+# Функция для поиска ID микрофона
+# Сначала по имени, затем через default input устройство
+find_microphone_id() {
+    local mic_id=""
+
+    # 1. Пробуем найти по имени "Headphones Stereo Microphone" (для обратной совместимости)
+    mic_id=$(wpctl status 2>/dev/null | grep "Headphones Stereo Microphone" | head -1 | awk '{print $3}' | sed 's/[^0-9]//g')
+
+    if [ ! -z "$mic_id" ] && [ "$mic_id" -gt 0 ] 2>/dev/null; then
+        echo "$mic_id|Headphones Stereo Microphone"
+        return 0
+    fi
+
+    # 2. Получаем default source и ищем его ID в wpctl
+    local default_source=$(pactl info 2>/dev/null | grep "Default Source:" | cut -d' ' -f3)
+
+    if [ ! -z "$default_source" ]; then
+        # Сначала ищем в Filters (для Bluetooth устройств) - устройство со звездочкой
+        mic_id=$(wpctl status 2>/dev/null | grep "*" | grep "$default_source" | head -1 | grep -oE '[0-9]+\.' | head -1 | sed 's/\.//')
+
+        if [ ! -z "$mic_id" ] && [ "$mic_id" -gt 0 ] 2>/dev/null; then
+            local mic_name=$(wpctl status 2>/dev/null | grep -E "^\s+\*\s+$mic_id\." | sed 's/.*\. //' | head -1)
+            echo "$mic_id|${mic_name:-$default_source}"
+            return 0
+        fi
+
+        # Ищем в Sources
+        mic_id=$(wpctl status 2>/dev/null | grep -A 50 "Sources:" | grep -E "^\s+[0-9]+\." | grep -F "$default_source" | head -1 | awk '{print $1}' | sed 's/[^0-9]//g')
+
+        if [ ! -z "$mic_id" ] && [ "$mic_id" -gt 0 ] 2>/dev/null; then
+            local mic_name=$(wpctl status 2>/dev/null | grep -E "^\s+$mic_id\." | sed 's/.*\. //' | head -1)
+            echo "$mic_id|${mic_name:-$default_source}"
+            return 0
+        fi
+    fi
+
+    echo "|"
+    return 1
+}
+
 # Функция для фиксации уровня входа
 fix_input_level() {
     echo "Фиксация уровня входа микрофона..."
 
     # Находим ID микрофона
-    MIC_ID=$(wpctl status | grep "Headphones Stereo Microphone" | head -1 | awk '{print $3}' | sed 's/[^0-9]//g')
+    local mic_info=$(find_microphone_id)
+    local MIC_ID=$(echo "$mic_info" | cut -d'|' -f1)
+    local MIC_NAME=$(echo "$mic_info" | cut -d'|' -f2)
 
     if [ ! -z "$MIC_ID" ] && [ "$MIC_ID" -gt 0 ] 2>/dev/null; then
         echo "Найден микрофон: $MIC_NAME (ID: $MIC_ID)"
@@ -51,14 +93,54 @@ create_level_keeper() {
 # Автор: 0xSlaweekq
 
 LOGFILE="/tmp/mic-level-keeper.log"
-MIC_NAME="Headphones Stereo Microphone"
+
+# Функция для поиска ID микрофона
+# Сначала по имени, затем через default input устройство
+find_microphone_id() {
+    local mic_id=""
+
+    # 1. Пробуем найти по имени "Headphones Stereo Microphone" (для обратной совместимости)
+    mic_id=$(wpctl status 2>/dev/null | grep "Headphones Stereo Microphone" | head -1 | awk '{print $3}' | sed 's/[^0-9]//g')
+
+    if [ ! -z "$mic_id" ] && [ "$mic_id" -gt 0 ] 2>/dev/null; then
+        echo "$mic_id|Headphones Stereo Microphone"
+        return 0
+    fi
+
+    # 2. Получаем default source и ищем его ID в wpctl
+    local default_source=$(pactl info 2>/dev/null | grep "Default Source:" | cut -d' ' -f3)
+
+    if [ ! -z "$default_source" ]; then
+        # Сначала ищем в Filters (для Bluetooth устройств) - устройство со звездочкой
+        mic_id=$(wpctl status 2>/dev/null | grep "*" | grep "$default_source" | head -1 | grep -oE '[0-9]+\.' | head -1 | sed 's/\.//')
+
+        if [ ! -z "$mic_id" ] && [ "$mic_id" -gt 0 ] 2>/dev/null; then
+            local mic_name=$(wpctl status 2>/dev/null | grep -E "^\s+\*\s+$mic_id\." | sed 's/.*\. //' | head -1)
+            echo "$mic_id|${mic_name:-$default_source}"
+            return 0
+        fi
+
+        # Ищем в Sources
+        mic_id=$(wpctl status 2>/dev/null | grep -A 50 "Sources:" | grep -E "^\s+[0-9]+\." | grep -F "$default_source" | head -1 | awk '{print $1}' | sed 's/[^0-9]//g')
+
+        if [ ! -z "$mic_id" ] && [ "$mic_id" -gt 0 ] 2>/dev/null; then
+            local mic_name=$(wpctl status 2>/dev/null | grep -E "^\s+$mic_id\." | sed 's/.*\. //' | head -1)
+            echo "$mic_id|${mic_name:-$default_source}"
+            return 0
+        fi
+    fi
+
+    echo "|"
+    return 1
+}
 
 echo "$(date): Starting microphone level keeper" >> "$LOGFILE"
-echo "$(date): Monitoring microphone: $MIC_NAME" >> "$LOGFILE"
 
 while true; do
     # Находим ID микрофона каждый раз заново (может измениться при перезапуске PipeWire)
-    MIC_ID=$(wpctl status | grep "Headphones Stereo Microphone" | head -1 | awk '{print $3}' | sed 's/[^0-9]//g')
+    mic_info=$(find_microphone_id)
+    MIC_ID=$(echo "$mic_info" | cut -d'|' -f1)
+    MIC_NAME=$(echo "$mic_info" | cut -d'|' -f2)
 
     if [ ! -z "$MIC_ID" ] && [ "$MIC_ID" -gt 0 ] 2>/dev/null; then
         # Получаем текущий уровень
@@ -70,7 +152,7 @@ while true; do
 
             # Если уровень меньше 95%, восстанавливаем до 100%
             if [ ! -z "$CURRENT_PERCENT" ] && [ "$CURRENT_PERCENT" -lt 95 ] 2>/dev/null; then
-                echo "$(date): Level dropped to ${CURRENT_PERCENT}%, restoring to 100%" >> "$LOGFILE"
+                echo "$(date): Level dropped to ${CURRENT_PERCENT}% on $MIC_NAME (ID: $MIC_ID), restoring to 100%" >> "$LOGFILE"
 
                 # Восстанавливаем уровень тремя способами
                 wpctl set-volume "$MIC_ID" 1.0 2>/dev/null
@@ -81,7 +163,11 @@ while true; do
             fi
         fi
     else
-        echo "$(date): Microphone not found, searching..." >> "$LOGFILE"
+        # Логируем только раз в 10 секунд, чтобы не засорять лог
+        if [ -z "$LAST_LOG_TIME" ] || [ $(($(date +%s) - LAST_LOG_TIME)) -ge 10 ]; then
+            echo "$(date): Microphone not found, searching..." >> "$LOGFILE"
+            LAST_LOG_TIME=$(date +%s)
+        fi
     fi
 
     # Проверяем каждые 0.2 секунды для быстрой реакции
@@ -258,8 +344,10 @@ check_status() {
     echo "================================================================="
 
     echo "--- Текущий уровень микрофона ---"
-    MIC_ID=$(wpctl status | grep "Headphones Stereo Microphone" | head -1 | awk '{print $3}' | sed 's/[^0-9]//g')
-    if [ ! -z "$MIC_ID" ]; then
+    mic_info=$(find_microphone_id)
+    MIC_ID=$(echo "$mic_info" | cut -d'|' -f1)
+    MIC_NAME=$(echo "$mic_info" | cut -d'|' -f2)
+    if [ ! -z "$MIC_ID" ] && [ "$MIC_ID" -gt 0 ] 2>/dev/null; then
         CURRENT_VOLUME=$(wpctl get-volume "$MIC_ID" 2>/dev/null | awk '{print $2}')
         CURRENT_PERCENT=$(echo "$CURRENT_VOLUME * 100" | bc -l 2>/dev/null | cut -d. -f1)
         echo "Микрофон: $MIC_NAME (ID: $MIC_ID)"
@@ -395,8 +483,10 @@ case "${1:-}" in
         ;;
     --test)
         echo "Тестирование восстановления уровня..."
-        MIC_ID=$(wpctl status | grep "Headphones Stereo Microphone" | head -1 | awk '{print $3}' | sed 's/[^0-9]//g')
-        if [ ! -z "$MIC_ID" ]; then
+        mic_info=$(find_microphone_id)
+        MIC_ID=$(echo "$mic_info" | cut -d'|' -f1)
+        MIC_NAME=$(echo "$mic_info" | cut -d'|' -f2)
+        if [ ! -z "$MIC_ID" ] && [ "$MIC_ID" -gt 0 ] 2>/dev/null; then
             echo "Тестируем микрофон: $MIC_NAME (ID: $MIC_ID)"
             echo "Снижаем уровень до 20%..."
             wpctl set-volume "$MIC_ID" 0.2 2>/dev/null
